@@ -1,0 +1,67 @@
+from pygame.math import Vector2
+import pygame
+
+class GameObject:
+    def __init__(self, position):
+        self.position = position
+        self.sprite = pygame.Surface((20, 20))
+        self.height = self.sprite.get_width()
+
+    def draw(self, surface):
+        blit_position = self.position - Vector2(self.height/2)
+        surface.blit(self.sprite, blit_position)
+
+
+
+    def collides_with(self, position):
+        return self.position == position
+
+
+class Snake(GameObject):
+    def __init__(self, position):
+        super().__init__(position)
+        self.sprite.fill((250, 250, 250))
+        self.head_sprite = pygame.Surface((20, 20))
+        self.head_sprite.fill((200, 200, 250))
+        self.segments = []
+        self.segments.append(position)
+        self.segments.append(Vector2(position)+(0,-20))
+        self.direction = 1
+
+    def draw(self, surface):
+        for s in self.segments:
+            if self.segments.index(s) == 0:
+                blit_position = s - Vector2(self.height/2)
+                surface.blit(self.head_sprite, blit_position)
+            else:
+                blit_position = s - Vector2(self.height/2)
+                surface.blit(self.sprite, blit_position)
+
+    def move(self, direction):
+        # 1-up 2-down 3-left 4-right
+
+        if direction == 1:
+            new_position=self.segments[0] - Vector2(0, self.height)
+        if direction == 2:
+            new_position=self.segments[0] + Vector2(0, self.height)
+        if direction == 3:
+            new_position=self.segments[0] - Vector2(self.height, 0)
+        if direction == 4:
+            new_position=self.segments[0] + Vector2( self.height, 0)
+
+        self.segments.insert(0,new_position)
+        self.segments.pop()
+
+
+    def add_segment(self, position):
+        self.segments.append(position)
+
+class Food(GameObject):
+    def __init__(self, position):
+        super().__init__(position)
+        self.sprite.fill((0, 250, 100))
+
+
+
+
+
