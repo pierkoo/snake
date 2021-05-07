@@ -1,22 +1,42 @@
 import pygame
 from models import Snake, Food
+from utils import get_random_position
 class SnakeGame:
+    SPEED_CHANGE = 10
 
     def __init__(self):
         self._init_pygame()
-        self.screen = pygame.display .set_mode((800, 600))
+        self.screen = pygame.display.set_mode((800, 600))
         self.background = pygame.Surface((800, 600))
         self.background.fill((50, 50, 50))
         self.clock = pygame.time.Clock()
-        self.play_again = True
-        self.pause = False
+        self.wraping = True
         self.setup_new_game()
 
     def setup_new_game(self):
-        self.eating = False
-        self.eating_prev = False
-        self.snake = Snake((400,300))
-        self.food = Food((100,100))
+        self.play_again = True
+        self. direction_chage_flag = False
+        self.pause = False
+        self.speed = 10
+        self.snake = Snake((300,400))
+        self.food = []
+        self.eated_food =[]
+        for r in range(1):
+            self.spawn_food()
+
+
+    def spawn_food(self, position = 0):
+        if position == 0:
+            while True:
+                position = get_random_position(self.screen)
+                if not self.snake.collides_with(position):
+                    break
+        self.food.insert(0,Food(position))
+
+    def change_speed(self, speed_change):
+        self.speed += speed_change
+        if self.speed < 10:
+            self.speed = 10
 
     def main_loop(self):
         while self.play_again == True:
@@ -36,48 +56,87 @@ class SnakeGame:
             ):
                 quit()
 
-            if event.type ==pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+            if event.type ==pygame.KEYDOWN and self.snake and not self. direction_chage_flag:
+                if event.key == pygame.K_w and self.snake.direction != 2 :
                     self.snake.direction = 1
-                if event.key == pygame.K_DOWN:
+                    self. direction_chage_flag = True
+                if event.key == pygame.K_s and self.snake.direction != 1 :
                     self.snake.direction = 2
-                if event.key == pygame.K_LEFT:
+                    self. direction_chage_flag = True
+                if event.key == pygame.K_a and self.snake.direction != 4 :
                     self.snake.direction = 3
-                if event.key == pygame.K_RIGHT:
+                    self. direction_chage_flag = True
+                if event.key == pygame.K_d and self.snake.direction != 3 :
                     self.snake.direction = 4
+                    self. direction_chage_flag = True
+
+            if event.type ==pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     if self.pause == False:
                         self.pause = True
                     else:
                         self.pause = False
+                if event.key == pygame.K_o:
+                    self.change_speed(self.SPEED_CHANGE)
+                if event.key == pygame.K_l:
+                    self.change_speed(-self.SPEED_CHANGE)
+                if event.key == pygame.K_r:
+                    self.setup_new_game()
 
     def _process_game_logic(self):
-        self.eating_prev = self.eating
-        if not self.pause:
-            self.snake.move(self.snake.direction)
-        if self.food.collides_with(self.snake.segments[0]) or self.food.collides_with(self.snake.segments[1]) :
-            self.eating = True
 
-            #self.snake.add_segment(self.food.position)
-        else:
-            self.eating = False
+        if not self.pause and self.snake:
+            self.snake.move(self.snake.direction, self.screen, self.wraping)
 
-        if self.eating == False and self.eating_prev == True:
-            print("helo")
-            self.snake.add_segment(self.food.position)
+        for f in self.food:
+            if self.snake  and self.snake.collides_with(f.position):
+                if not f.in_snake:
+                    f.in_snake = True
+                    self.spawn_food()
+            else:
+                if self.snake and  f.in_snake:
+                    self.speed += 0.5
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+                    self.snake.add_segment(f.position)
+
+                    self.food.remove(f)
+
+        if self.snake:
+            for s in self.snake.segments:
+                if self.snake.collides_with_itself():
+                    self.snake = None
+                    break
 
 
-
-
-
+        if not self.wraping and self.snake:
+            print ((self.snake.segments[0]))
+            if (self.snake.segments[0].x<0
+                or self.snake.segments[0].x> self.screen.get_width()
+                or self.snake.segments[0].y<0
+                or self.snake.segments[0].y> self.screen.get_height()
+            ) :
+                self.snake= None
+        self. direction_chage_flag = False
     def _draw(self):
         self.screen.blit(self.background, (0, 0))
-
         if self.food:
-            self.food.draw(self.screen)
+            for f in self.food:
+                f.draw(self.screen)
+        if self.snake:
+            self.snake.draw(self.screen)
 
-        self.snake.draw(self.screen)
+
+        self.clock.tick(self.speed)
 
         pygame.display.flip()
-        self.clock.tick(10)
+
+
+
 
