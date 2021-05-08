@@ -4,7 +4,7 @@ from utils import wrap_position
 
 class GameObject:
     def __init__(self, position):
-        self.position = position
+        self.position = Vector2(position)
         self.sprite = pygame.Surface((20, 20))
         self.height = self.sprite.get_width()
 
@@ -19,11 +19,12 @@ class GameObject:
 
 
 class Snake(GameObject):
-    def __init__(self, position):
+    def __init__(self, position, color):
         super().__init__(position)
         self.sprite.fill((250, 250, 250))
         self.head_sprite = pygame.Surface((20, 20))
-        self.head_sprite.fill((200, 200, 250))
+        #self.head_sprite.fill((200, 200, 250))
+        self.head_sprite.fill(color)
         self.segments = []
         self.segments.append(position)
         self.direction = 1
@@ -79,6 +80,35 @@ class Food(GameObject):
     def eaten(self):
         pass
 
+class EnemySnake(Snake):
+    def __init__(self, position, color):
+        super().__init__(position, color)
+
+    def get_direction(self, target_position, surface, wrapping):
+        position_diff = Vector2(self.segments[0])-target_position
+        abs_position_diff = (abs(position_diff[0]), abs(position_diff[1]))
+        max_position_diff=max(abs_position_diff)
+        index = abs_position_diff.index(max_position_diff)
+        stop = False
+        if index == 0:
+            if position_diff[0] > 0:
+                self.direction = 3
+            elif position_diff[0] < 0:
+                self.direction = 4
+            else:
+                stop = True
+        if index == 1:
+            if position_diff[1] > 0:
+                self.direction = 1
+            elif position_diff[1] < 0:
+                self.direction = 2
+            else:
+                stop = True
+        if not stop:
+            self.move(self.direction, surface, wrapping)
+
+
+        #print(self.position.distance_to(target_position))
 
 
 
