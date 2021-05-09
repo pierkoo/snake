@@ -4,6 +4,7 @@ from utils import get_random_position
 class SnakeGame:
     SPEED_CHANGE = 10
 
+
     def __init__(self):
         self._init_pygame()
         self.screen = pygame.display.set_mode((800, 600))
@@ -11,27 +12,37 @@ class SnakeGame:
         self.background.fill((50, 50, 50))
         self.clock = pygame.time.Clock()
         self.wraping = True
-        self.setup_new_game()
+        self.play_mode = 3
+        self.enemy_snake_grows = True
+        self.setup_new_game(self.play_mode)
 
-    def setup_new_game(self):
+    def setup_new_game(self, play_mode):
+        # play mode: 1 - only snake, 2 - with enemy snake, 3 - only enemy snake
         self.tick = False
         self.play_again = True
         self. direction_chage_flag = False
         self.pause = False
-        self.speed = 10
-        self.snake = Snake((300,400), (100, 200, 250))
-        self.enemy_snake = EnemySnake((500,400), (200,0, 0))
+        self.speed = 40
+        self.snake = None
+        self.enemy_snake = None
+        if play_mode == 1 or play_mode == 2:
+            self.snake = Snake((300,400), (100, 200, 250))
+        if play_mode == 2 or play_mode == 3:
+            self.enemy_snake = EnemySnake((500,400), (200,0, 0))
+
         self.food = []
         self.eated_food =[]
         for r in range(1):
             self.spawn_food()
 
-
     def spawn_food(self, position = 0):
         if position == 0:
             while True:
                 position = get_random_position(self.screen)
-                if not self.snake.collides_with(position):
+                if self.snake:
+                    if not self.snake.collides_with(position):
+                        break
+                else:
                     break
         self.food.insert(0,Food(position))
 
@@ -74,70 +85,81 @@ class SnakeGame:
 
             if event.type ==pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if self.pause == False:
-                        self.pause = True
-                    else:
-                        self.pause = False
+                    self.pause = not self.pause
+
                 if event.key == pygame.K_o:
                     self.change_speed(self.SPEED_CHANGE)
                 if event.key == pygame.K_l:
                     self.change_speed(-self.SPEED_CHANGE)
                 if event.key == pygame.K_r:
-                    self.setup_new_game()
+                    self.setup_new_game(self.play_mode)
 
     def _process_game_logic(self):
+        if not self.pause:
+            if self.snake:
+                self.snake.move(self.snake.direction, self.screen, self.wraping)
 
-        if not self.pause and self.snake:
-            self.snake.move(self.snake.direction, self.screen, self.wraping)
-            if  self.tick:
-                self.enemy_snake.get_direction(self.food[0].position, self.screen, self.wraping)
+                for s in self.snake.segments:
+                    if self.snake.collides_with_itself() or (self.enemy_snake and self.snake.collides_with(self.enemy_snake.segments[0])):
+                        self.snake = None
+                        break
 
-        if self.snake:
-            for s in self.snake.segments:
-                if self.snake.collides_with_itself() or self.snake.collides_with(self.enemy_snake.segments[0]):
-                    self.snake = None
-                    break
-
-
-        for f in self.food:
-            if self.snake  and self.snake.collides_with(f.position):
-                if not f.in_snake:
-                    f.in_snake = True
-                    self.spawn_food()
-            else:
-                if self.snake and  f.in_snake:
-                    self.speed += 0.5
-                    self.snake.add_segment(f.position)
-                    self.food.remove(f)
-            if self.enemy_snake and self.enemy_snake.collides_with(f.position):
-                self.food.remove(f)
-                self.spawn_food()
+                for f in self.food:
+                    if self.snake.collides_with(f.position):
+                        if not f.in_snake:
+                            f.in_snake = True
+                            self.spawn_food()
+                    else:
+                        if f.in_snake:
+                            self.speed += 0.5
+                            self.snake.add_segment(f.position)
+                            self.food.remove(f)
 
 
+                if not self.wraping:
+                    if not self.screen.get_rect().collidepoint(self.snake.segments[0]):
+                        self.snake = None
 
+                self. direction_chage_flag = False
 
-        if not self.wraping and self.snake:
-            #print ((self.snake.segments[0]))
-            if (self.snake.segments[0].x<0
-                or self.snake.segments[0].x> self.screen.get_width()
-                or self.snake.segments[0].y<0
-                or self.snake.segments[0].y> self.screen.get_height()
-            ) :
-                self.snake= None
-        self. direction_chage_flag = False
+            ## enemy_snake_handling
+            if self.enemy_snake:
+                if self.tick:
+                    self.enemy_snake.move(self.food[0].position, self.screen, self.wraping)
 
-        self.tick = not self.tick
+                self.tick = not self.tick
+
+                for f in self.food:
+                    if self.enemy_snake_grows:
+                        if self.enemy_snake.collides_with(f.position):
+                            if not f.in_snake:
+                                f.in_snake = True
+                                self.spawn_food()
+                        else:
+                            if f.in_snake:
+                                self.enemy_snake.add_segment(f.position)
+                                self.food.remove(f)
+                    else:
+                        if self.enemy_snake.collides_with(f.position):
+                            self.food.remove(f)
+                            self.spawn_food()
+                for s in self.enemy_snake.segments:
+                    if self.enemy_snake.collides_with_itself():
+                        self.enemy_snake = None
+                        break
+
     def _draw(self):
         self.screen.blit(self.background, (0, 0))
+
         if self.food:
             for f in self.food:
                 f.draw(self.screen)
+
         if self.snake:
             self.snake.draw(self.screen)
 
         if self.enemy_snake:
             self.enemy_snake.draw(self.screen)
-
 
         self.clock.tick(self.speed)
 

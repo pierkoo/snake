@@ -63,12 +63,25 @@ class Snake(GameObject):
         else:
             return False
 
-
     def collides_with_itself(self):
         if self.segments[0] in self.segments[1:]:
             return True
         else:
             return False
+
+    # concept?
+    # def eat(self,food, callback_function):
+
+    #     if  self.collides_with(food.position):
+    #         if not food.in_snake:
+    #             food.in_snake = True
+    #             callback_function
+    #     else:
+    #         if food.in_snake:
+    #             self.speed += 0.5
+    #             self.add_segment(food.position)
+    #             f.remove(food)
+
 
 
 class Food(GameObject):
@@ -81,31 +94,88 @@ class Food(GameObject):
         pass
 
 class EnemySnake(Snake):
+
+
     def __init__(self, position, color):
         super().__init__(position, color)
+        self.prev_index = 0
 
     def get_direction(self, target_position, surface, wrapping):
+
         position_diff = Vector2(self.segments[0])-target_position
         abs_position_diff = (abs(position_diff[0]), abs(position_diff[1]))
-        max_position_diff=max(abs_position_diff)
+        max_position_diff = max(abs_position_diff)
+
         index = abs_position_diff.index(max_position_diff)
-        stop = False
+        if index != self.prev_index and abs_position_diff[self.prev_index] !=0:
+            index = self.prev_index
+
+        #print(position_diff, " | ", abs_position_diff, " | ", max_position_diff ," | ", index )
+
         if index == 0:
             if position_diff[0] > 0:
-                self.direction = 3
+                self.direction = self.check_direction(3)
             elif position_diff[0] < 0:
-                self.direction = 4
-            else:
-                stop = True
+                self.direction = self.check_direction(4)
+
         if index == 1:
             if position_diff[1] > 0:
-                self.direction = 1
+                self.direction = self.check_direction(1)
             elif position_diff[1] < 0:
-                self.direction = 2
+                self.direction = self.check_direction(2)
+
+        self.prev_index = index
+
+    def check_direction(self, new_direction):
+        ''' Prevenst changing direction for opposite '''
+
+        # print(self.direction, ' | ', new_direction)
+
+        if new_direction == 1 and self.direction == 2:
+            return 3
+        elif new_direction == 2 and self.direction == 1:
+            return  4
+        elif new_direction == 3 and self.direction == 4:
+            return  1
+        elif new_direction == 4 and self.direction == 3:
+            return  2
+        else:
+            return new_direction
+
+    def get_new_postion(self, surface, wrapping):
+        # 1-up 2-down 3-left 4-right
+        if self.direction > 4:
+            self.direction = 1
+        if self.direction == 1:
+            new_position=wrap_position(self.segments[0] - Vector2(0, self.height), surface, wrapping)
+        if self.direction == 2:
+            new_position=wrap_position(self.segments[0] + Vector2(0, self.height), surface ,wrapping)
+        if self.direction == 3:
+            new_position=wrap_position(self.segments[0] - Vector2(self.height, 0), surface ,wrapping)
+        if self.direction == 4:
+            new_position=wrap_position(self.segments[0] + Vector2( self.height, 0), surface ,wrapping)
+        return new_position
+
+    def check_postion(self, new_position):
+        if self.collides_with(new_position):
+            return False
+        return True
+
+    def move(self, target_position, surface, wrapping):
+        self.get_direction(target_position, surface, wrapping)
+        while True:
+            new_position = self.get_new_postion( surface, wrapping)
+            if self.check_postion(new_position):
+                break
             else:
-                stop = True
-        if not stop:
-            self.move(self.direction, surface, wrapping)
+                self.direction += 1
+                print("upsi | ", self.direction)
+
+
+        self.segments.insert(0,new_position)
+        self.segments.pop()
+
+        #super(EnemySnake, self).move(self.direction, surface, wrapping)
 
 
         #print(self.position.distance_to(target_position))
