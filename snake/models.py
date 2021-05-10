@@ -156,20 +156,51 @@ class EnemySnake(Snake):
             new_position=wrap_position(self.segments[0] + Vector2( self.height, 0), surface ,wrapping)
         return new_position
 
-    def check_postion(self, new_position):
-        if self.collides_with(new_position):
-            return False
-        return True
+    # def check_postion(self, new_position):
+    #     if self.collides_with(new_position):
+    #         return False
+    #     return True
+
+    def get_new_direction(self,new_position):
+        colliding_segment_index = self.segments.index(new_position)
+        if colliding_segment_index + 1 < len(self.segments):
+            next_segment = self.segments[colliding_segment_index  + 1 ]
+            if self.segments[0].y == new_position.y:
+                if self.segments[0].y - next_segment.y > 0:
+                    self.direction = 1
+                else:
+                    self.direction = 2
+            else:
+                if self.segments[0].x - next_segment.x > 0:
+                    self.direction = 3
+                else:
+                    self.direction = 4
+        else:
+            next_segment = self.segments[colliding_segment_index  - 1 ]
+            if self.segments[0].y == new_position.y:
+                if self.segments[0].y - next_segment.y < 0:
+                    self.direction = 1
+                else:
+                    self.direction = 2
+            else:
+                if self.segments[0].x - next_segment.x < 0:
+                    self.direction = 3
+                else:
+                    self.direction = 4
+
+
+        print(self.segments[0], ' | ', new_position, ' | ', next_segment, ' | ',self.direction)
 
     def move(self, target_position, surface, wrapping):
         self.get_direction(target_position, surface, wrapping)
         while True:
             new_position = self.get_new_postion( surface, wrapping)
-            if self.check_postion(new_position):
+            if not self.collides_with(new_position):
                 break
             else:
-                self.direction += 1
-                print("upsi | ", self.direction)
+                self.get_new_direction(new_position)
+                #self.direction += 1
+                #print("upsi | ", self.direction)
 
 
         self.segments.insert(0,new_position)

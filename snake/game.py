@@ -148,6 +148,8 @@ class SnakeGame:
                         self.enemy_snake = None
                         break
 
+                #print(self.enemy_snake.segments)
+
     def _draw(self):
         self.screen.blit(self.background, (0, 0))
 
@@ -160,6 +162,7 @@ class SnakeGame:
 
         if self.enemy_snake:
             self.enemy_snake.draw(self.screen)
+
 
         self.clock.tick(self.speed)
 
