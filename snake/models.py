@@ -26,7 +26,7 @@ class Snake(GameObject):
         #self.head_sprite.fill((200, 200, 250))
         self.head_sprite.fill(color)
         self.segments = []
-        self.segments.append(position)
+        self.segments.append(self.position)
         self.direction = 1
 
     def draw(self, surface):
@@ -191,7 +191,19 @@ class EnemySnake(Snake):
                     self.direction = 4
 
 
+
+
         print(self.segments[0], ' | ', new_position, ' | ', next_segment, ' | ',self.direction)
+
+    def check_for_looping(self):
+        pass
+
+    def another_segment_in_proximity(self):
+        for s in self.segments[2:]:
+            if self.segments[0].distance_to(s) == 20:
+                print("upsi")
+                return True
+        return False
 
     def move(self, target_position, surface, wrapping):
         self.get_direction(target_position, surface, wrapping)
@@ -202,9 +214,9 @@ class EnemySnake(Snake):
             else:
                 self.get_new_direction(new_position)
                 #self.direction += 1
-                #print("upsi | ", self.direction)
+                #print("upsi | ", self.direction
 
-
+        self.another_segment_in_proximity()
         self.segments.insert(0,new_position)
         self.segments.pop()
 
