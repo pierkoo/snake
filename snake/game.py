@@ -22,13 +22,15 @@ class SnakeGame:
         self.play_again = True
         self. direction_chage_flag = False
         self.pause = False
-        self.speed = 40
+        self.speed = 150
         self.snake = None
         self.enemy_snake = None
         if play_mode == 1 or play_mode == 2:
             self.snake = Snake((300,400), (100, 200, 250))
         if play_mode == 2 or play_mode == 3:
             self.enemy_snake = EnemySnake((500,400), (200,0, 0))
+            # for s in range(20):
+            #     self.enemy_snake.add_segment((500,400))
 
         self.food = []
         self.eated_food =[]

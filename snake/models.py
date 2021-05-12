@@ -90,6 +90,7 @@ class Food(GameObject):
         self.sprite.fill((0, 250, 100))
         self.in_snake = False
 
+
     def eaten(self):
         pass
 
@@ -99,6 +100,7 @@ class EnemySnake(Snake):
     def __init__(self, position, color):
         super().__init__(position, color)
         self.prev_index = 0
+
 
     def get_direction(self, target_position, surface, wrapping):
 
