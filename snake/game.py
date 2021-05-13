@@ -22,7 +22,7 @@ class SnakeGame:
         self.play_again = True
         self. direction_chage_flag = False
         self.pause = False
-        self.speed = 50
+        self.speed = 10
         self.snake = None
         self.enemy_snake = None
         if play_mode == 1 or play_mode == 2:
@@ -127,8 +127,10 @@ class SnakeGame:
             ## enemy_snake_handling
             if self.enemy_snake:
                 if self.tick:
-                    self.enemy_snake.move(self.food[0].position, self.screen, self.wraping)
-
+                    print("pre")
+                    self.enemy_snake.move1(self.food[0].position, self.screen, self.wraping)
+                    print("past")
+                print(len(self.enemy_snake.segments))
                 self.tick = not self.tick
 
                 for f in self.food:
@@ -147,7 +149,9 @@ class SnakeGame:
                             self.spawn_food()
                 for s in self.enemy_snake.segments:
                     if self.enemy_snake.collides_with_itself():
-                        self.enemy_snake = None
+                        print(*self.enemy_snake.segments)
+                        self.pause=True
+                        #self.enemy_snake = None
                         break
 
                 # print(self.enemy_snake.segments[0].distance_to(self.food[0].position))
@@ -166,7 +170,7 @@ class SnakeGame:
             self.enemy_snake.draw(self.screen)
 
 
-        #self.clock.tick(self.speed)
+        self.clock.tick(self.speed)
 
         pygame.display.flip()
 

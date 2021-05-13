@@ -100,6 +100,7 @@ class EnemySnake(Snake):
     def __init__(self, position, color):
         super().__init__(position, color)
         self.prev_index = 0
+        self.new_positions = []
 
 
     def get_direction(self, target_position, surface, wrapping):
@@ -220,10 +221,54 @@ class EnemySnake(Snake):
         self.segments.insert(0,new_position)
         self.segments.pop()
 
+    def move1(self, target_position, surface, wrapping):
+        self.calculate_possible_new_positions(surface)
+        self.select_closes_position(target_position)
+
+        self.segments.insert(0,self.new_position)
+        self.segments.pop()
+        ''' self.calculate_possible_new_positions()
+                self.check_new_postions_for_self)collision()
+                # should get at least 2 possible new positions otherwise its already lost
+                self.check_new_positions_for_looping
+                self.select_closest_postion() - selects new_postion closestto food
+                '''
+
+
+
         #super(EnemySnake, self).move(self.direction, surface, wrapping)
 
 
         #print(self.position.distance_to(target_position))
+
+    def calculate_possible_new_positions(self, surface):
+        self.new_positions = []
+        self.new_positions.append(wrap_position(self.segments[0]+(20,0),surface))
+        self.new_positions.append(wrap_position(self.segments[0]+(0,20),surface))
+        self.new_positions.append(wrap_position(self.segments[0]+(-20,0),surface))
+        self.new_positions.append(wrap_position(self.segments[0]+(0,-20),surface))
+
+        if len(self.segments)>1:
+            self.new_positions.remove(self.segments[1])
+
+        # to be checked if slicing is ok ??
+        for s in self.segments:
+            if s in self.new_positions:
+                self.new_positions.remove(s)
+        print(f"current {self.segments[0]}")
+        #print(f"neeck {self.segments[1]}")
+        print("New positions")
+        for p in self.new_positions:
+            print(p)
+
+    def select_closes_position(self, target_position):
+        distance_to_target = []
+        for n_p in self.new_positions:
+            distance_to_target.append(n_p.distance_to(target_position))
+            self.new_position =  self.new_positions[distance_to_target.index(min(distance_to_target))]
+        print(f"NEW: {self.new_position}")
+
+
 
 
 

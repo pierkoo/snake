@@ -2,7 +2,7 @@ from pygame.math import Vector2
 from random import randrange, randint
 from math import floor
 
-def wrap_position(position, surface, wrapping):
+def wrap_position(position, surface, wrapping = 1):
     if wrapping:
         x, y = position
         w, h = surface.get_size()
