@@ -196,8 +196,7 @@ class EnemySnake(Snake):
 
         print(self.segments[0], ' | ', new_position, ' | ', next_segment, ' | ',self.direction)
 
-    def check_for_looping(self):
-        pass
+
 
     def another_segment_in_proximity(self):
         for s in self.segments[2:]:
@@ -223,7 +222,10 @@ class EnemySnake(Snake):
 
     def move1(self, target_position, surface, wrapping):
         self.calculate_possible_new_positions(surface)
+        self.check_for_looping()
         self.select_closes_position(target_position)
+
+
 
         self.segments.insert(0,self.new_position)
         self.segments.pop()
@@ -233,13 +235,6 @@ class EnemySnake(Snake):
                 self.check_new_positions_for_looping
                 self.select_closest_postion() - selects new_postion closestto food
                 '''
-
-
-
-        #super(EnemySnake, self).move(self.direction, surface, wrapping)
-
-
-        #print(self.position.distance_to(target_position))
 
     def calculate_possible_new_positions(self, surface):
         self.new_positions = []
@@ -255,19 +250,29 @@ class EnemySnake(Snake):
         for s in self.segments:
             if s in self.new_positions:
                 self.new_positions.remove(s)
-        print(f"current {self.segments[0]}")
+        #print(f"current {self.segments[0]}")
         #print(f"neeck {self.segments[1]}")
-        print("New positions")
-        for p in self.new_positions:
-            print(p)
+        #print("New positions")
+        # for p in self.new_positions:
+        #     print(p)
 
     def select_closes_position(self, target_position):
         distance_to_target = []
         for n_p in self.new_positions:
             distance_to_target.append(n_p.distance_to(target_position))
             self.new_position =  self.new_positions[distance_to_target.index(min(distance_to_target))]
-        print(f"NEW: {self.new_position}")
+        # print(f"NEW: {self.new_position}")
 
+    def check_for_looping(self):
+        print("----")
+
+        if len(self.segments) > 1:
+            print(self.segments[0],'  ', self.segments[1])
+            if self.segments[0].x == self.segments[1].x:
+                front=Vector2(self.segments[0].x,self.segments[0].y + (self.segments[0].y - self.segments[1].y ))
+            else:
+                front=Vector2(self.segments[0].x + (self.segments[0].x - self.segments[1].x ),self.segments[0].y)
+            print(front)
 
 
 

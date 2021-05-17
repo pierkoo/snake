@@ -1,14 +1,6 @@
-from pygame import Vector2
+list1 = [1, 2]
+list2 = [4, 5, 6]
 
-a = Vector2((1,1))
-b = Vector2((2,2))
-t= Vector2((4,4))
+products = [a * 20 for a in list1]
 
-c = [a,b]
-l=[]
-for e in c:
-    l.append(e.distance_to(t))
-
-n_p = c[l.index(min(l))]
-print(n_p)
-
+print(products)

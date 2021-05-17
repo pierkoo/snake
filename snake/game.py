@@ -1,6 +1,6 @@
 import pygame
 from models import Snake, Food, EnemySnake
-from utils import get_random_position
+from utils import get_random_position, get_mouse_pos
 class SnakeGame:
     SPEED_CHANGE = 10
 
@@ -18,11 +18,11 @@ class SnakeGame:
 
     def setup_new_game(self, play_mode):
         # play mode: 1 - only snake, 2 - with enemy snake, 3 - only enemy snake
-        self.tick = False
+        self.tick = True
         self.play_again = True
         self. direction_chage_flag = False
         self.pause = False
-        self.speed = 10
+        self.speed = 30
         self.snake = None
         self.enemy_snake = None
         if play_mode == 1 or play_mode == 2:
@@ -127,11 +127,12 @@ class SnakeGame:
             ## enemy_snake_handling
             if self.enemy_snake:
                 if self.tick:
-                    print("pre")
+                    #print("pre")
                     self.enemy_snake.move1(self.food[0].position, self.screen, self.wraping)
-                    print("past")
-                print(len(self.enemy_snake.segments))
-                self.tick = not self.tick
+                    #print("past")
+                #print(len(self.enemy_snake.segments))
+                if self.play_mode != 3:
+                    self.tick = not self.tick
 
                 for f in self.food:
                     if self.enemy_snake_grows:
@@ -149,12 +150,15 @@ class SnakeGame:
                             self.spawn_food()
                 for s in self.enemy_snake.segments:
                     if self.enemy_snake.collides_with_itself():
-                        print(*self.enemy_snake.segments)
+                        print(len(self.enemy_snake.segments))
+                        #print(*self.enemy_snake.segments)
                         self.pause=True
+                        #self.setup_new_game(self.play_mode)
                         #self.enemy_snake = None
                         break
 
                 # print(self.enemy_snake.segments[0].distance_to(self.food[0].position))
+
 
     def _draw(self):
         self.screen.blit(self.background, (0, 0))
@@ -170,6 +174,7 @@ class SnakeGame:
             self.enemy_snake.draw(self.screen)
 
 
+        #print(get_mouse_pos())
         self.clock.tick(self.speed)
 
         pygame.display.flip()
