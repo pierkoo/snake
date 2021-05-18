@@ -1,6 +1,6 @@
 from pygame.math import Vector2
 import pygame
-from utils import wrap_position
+from utils import wrap_position, propagate_position
 
 class GameObject:
     def __init__(self, position):
@@ -99,6 +99,7 @@ class EnemySnake(Snake):
 
     def __init__(self, position, color):
         super().__init__(position, color)
+        self.head_corners = []
         self.prev_index = 0
         self.new_positions = []
 
@@ -222,19 +223,24 @@ class EnemySnake(Snake):
 
     def move1(self, target_position, surface, wrapping):
         self.calculate_possible_new_positions(surface)
-        self.check_for_looping()
+        if self.check_for_looping():
+            print("---")
+            print("pre: ",len(self.new_positions))
+            temp_new_positions = self.new_positions[:]
+            for n_p in self.new_positions:
+                if not self.check_if_position_can_reach_last_segment(n_p,surface):
+                    temp_new_positions.remove(n_p)
+                    print("FAAAAAAAAAALSE")
+                else:
+                    print("true")
+
+            self.new_positions = temp_new_positions
+            print("post: ",len(self.new_positions))
         self.select_closes_position(target_position)
-
-
 
         self.segments.insert(0,self.new_position)
         self.segments.pop()
-        ''' self.calculate_possible_new_positions()
-                self.check_new_postions_for_self)collision()
-                # should get at least 2 possible new positions otherwise its already lost
-                self.check_new_positions_for_looping
-                self.select_closest_postion() - selects new_postion closestto food
-                '''
+
 
     def calculate_possible_new_positions(self, surface):
         self.new_positions = []
@@ -264,15 +270,55 @@ class EnemySnake(Snake):
         # print(f"NEW: {self.new_position}")
 
     def check_for_looping(self):
-        print("----")
-
+        #print("----")
+        #print("head  ",self.segments[0])
+        self.head_corners = []
         if len(self.segments) > 1:
-            print(self.segments[0],'  ', self.segments[1])
+            #print(self.segments[0],'  ', self.segments[1])
             if self.segments[0].x == self.segments[1].x:
-                front=Vector2(self.segments[0].x,self.segments[0].y + (self.segments[0].y - self.segments[1].y ))
+                self.head_corners.append(Vector2(self.segments[0].x + 20,self.segments[0].y + (self.segments[0].y - self.segments[1].y )))
+                self.head_corners.append(Vector2(self.segments[0].x -20,self.segments[0].y + (self.segments[0].y - self.segments[1].y )))
+                #print("s_c", *self.head_corners)
             else:
-                front=Vector2(self.segments[0].x + (self.segments[0].x - self.segments[1].x ),self.segments[0].y)
-            print(front)
+                self.head_corners.append(Vector2(self.segments[0].x + (self.segments[0].x - self.segments[1].x ),self.segments[0].y + 20))
+                self.head_corners.append(Vector2(self.segments[0].x + (self.segments[0].x - self.segments[1].x ),self.segments[0].y - 20))
+                #print("s_c", *self.head_corners)
+
+        for c in self.head_corners:
+            if c in self.segments:
+                return True
+        return False
+
+
+
+
+    def check_if_position_can_reach_last_segment(self, new_postion, surface):
+        propagating_positions = [new_postion]
+        while True:
+            temp_pos = propagating_positions[:]
+            for p in propagating_positions:
+                result = propagate_position(p,surface)
+                for r in result:
+                    if r not in temp_pos and r not in self.segments[:-1]:
+                        temp_pos.append(r)
+                        #print(temp_pos)
+            if self.segments[-1] in temp_pos:
+                return True
+            if propagating_positions == temp_pos:
+                return False
+            propagating_positions = temp_pos
+
+            '''
+            1. propagate position
+                - get coordinates
+                - check if any ccordinates in snake
+                - add coordinates not in snake
+                - check if tail in cordinates
+                - i cant add any more coordinates break
+
+                '''
+
+
 
 
 

@@ -71,7 +71,7 @@ class SnakeGame:
             ):
                 quit()
 
-            if event.type ==pygame.KEYDOWN and self.snake and not self. direction_chage_flag:
+            if event.type == pygame.KEYDOWN and self.snake and not self. direction_chage_flag:
                 if event.key == pygame.K_w and self.snake.direction != 2 :
                     self.snake.direction = 1
                     self. direction_chage_flag = True
@@ -85,7 +85,7 @@ class SnakeGame:
                     self.snake.direction = 4
                     self. direction_chage_flag = True
 
-            if event.type ==pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.pause = not self.pause
 
@@ -95,6 +95,9 @@ class SnakeGame:
                     self.change_speed(-self.SPEED_CHANGE)
                 if event.key == pygame.K_r:
                     self.setup_new_game(self.play_mode)
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                print(get_mouse_pos())
 
     def _process_game_logic(self):
         if not self.pause:
@@ -161,23 +164,26 @@ class SnakeGame:
 
 
     def _draw(self):
-        self.screen.blit(self.background, (0, 0))
+        if not self.pause:
+            #print("frame")
+            self.screen.blit(self.background, (0, 0))
 
-        if self.food:
-            for f in self.food:
-                f.draw(self.screen)
+            if self.food:
+                for f in self.food:
+                    f.draw(self.screen)
 
-        if self.snake:
-            self.snake.draw(self.screen)
+            if self.snake:
+                self.snake.draw(self.screen)
 
-        if self.enemy_snake:
-            self.enemy_snake.draw(self.screen)
+            if self.enemy_snake:
+                self.enemy_snake.draw(self.screen)
 
 
-        #print(get_mouse_pos())
-        self.clock.tick(self.speed)
 
-        pygame.display.flip()
+
+            self.clock.tick(self.speed)
+
+            pygame.display.flip()
 
 
 
