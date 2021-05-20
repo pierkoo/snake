@@ -181,7 +181,7 @@ class SnakeGame:
 
 
 
-            self.clock.tick(self.speed)
+            #self.clock.tick(self.speed)
 
             pygame.display.flip()
 

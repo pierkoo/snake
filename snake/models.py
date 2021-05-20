@@ -223,20 +223,24 @@ class EnemySnake(Snake):
 
     def move1(self, target_position, surface, wrapping):
         self.calculate_possible_new_positions(surface)
-        if self.check_for_looping():
-            print("---")
-            print("pre: ",len(self.new_positions))
-            temp_new_positions = self.new_positions[:]
-            for n_p in self.new_positions:
-                if not self.check_if_position_can_reach_last_segment(n_p,surface):
-                    temp_new_positions.remove(n_p)
-                    print("FAAAAAAAAAALSE")
-                else:
-                    print("true")
+        if len(self.new_positions) > 1:
+            if self.check_for_looping():
+                print("---")
+                print("pre: ",len(self.new_positions))
+                temp_new_positions = self.new_positions[:]
+                for n_p in self.new_positions:
+                    if not self.check_if_position_can_reach_last_segment(n_p,surface):
+                        temp_new_positions.remove(n_p)
+                        print("FAAAAAAAAAALSE")
+                    else:
+                        print("true")
+                        #self.temp_new_positions = [n_p]
+                        #break
 
-            self.new_positions = temp_new_positions
-            print("post: ",len(self.new_positions))
+                self.new_positions = temp_new_positions
+                print("post: ",len(self.new_positions))
         self.select_closes_position(target_position)
+
 
         self.segments.insert(0,self.new_position)
         self.segments.pop()
@@ -296,7 +300,9 @@ class EnemySnake(Snake):
         propagating_positions = [new_postion]
         while True:
             temp_pos = propagating_positions[:]
-            for p in propagating_positions:
+            tep_pos1 = []
+            #for p in propagating_positions:
+            for p in temp_pos:
                 result = propagate_position(p,surface)
                 for r in result:
                     if r not in temp_pos and r not in self.segments[:-1]:
